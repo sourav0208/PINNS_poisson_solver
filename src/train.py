@@ -10,11 +10,11 @@ from losses import compute_pde_residual, pde_loss, boundary_loss
 def train_pinn(
         n_interior=2000,
         n_boundary_per_side=500,
-        hidden_dim=32,
-        num_hidden_layers=3,
+        hidden_dim=64,
+        num_hidden_layers=4,
         lerning_rate=1e-3,
-        epochs=5000,
-        lambda_bc=10.0,
+        epochs=10000,
+        lambda_bc=50.0,
         chechpoint_dir=rf"C:\SOURAV\pinns_poisson_solver\outputs\checkpoints",
         figure_dir = rf"C:\SOURAV\pinns_poisson_solver\outputs\figures"
 ):
@@ -69,7 +69,11 @@ def train_pinn(
             torch.save(model.state_dict(), checkpoint_path)
 
     final_model_path = os.path.join(chechpoint_dir, "pinn_final.pt")
-    torch.save(model.state_dict(), final_model_path)
+    torch.save({
+        "model_state_dict": model.state_dict(),
+        "hidden_dim":hidden_dim,
+        "num_hidden_layers": num_hidden_layers
+    }, final_model_path)
 
     plt.figure(figsize=(8,5))
     plt.semilogy(total_loss_history, label="Total Loss")
