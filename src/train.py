@@ -1,11 +1,18 @@
 import os
 import torch
+import time
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from model import PINN
 from data import sample_boundary_points, sample_interior_points
-from losses import compute_pde_residual, pde_loss, boundary_loss
+from losses import  pde_loss, boundary_loss, compute_pde_residual
 
+def total_loss_fn(model, interior_points, boundary_points, lambda_bc):
+    loss_pde = pde_loss(model, interior_points)
+    loss_bc = boundary_loss(model, boundary_points)
+    loss_total = loss_pde + lambda_bc*loss_bc
+
+    return loss_pde, loss_bc, loss_total
 
 def train_pinn(
         n_interior=2000,
@@ -13,27 +20,32 @@ def train_pinn(
         hidden_dim=64,
         num_hidden_layers=4,
         lerning_rate=1e-3,
-        epochs=10000,
+        adam_epochs =8000,
         lambda_bc=50.0,
-        chechpoint_dir=rf"C:\SOURAV\pinns_poisson_solver\outputs\checkpoints",
-        figure_dir = rf"C:\SOURAV\pinns_poisson_solver\outputs\figures"
+        use_lbfgs =True,
+        lbfgs_steps=500,
+        checkpoint_path=rf"C:\SOURAV\pinns_poisson_solver\outputs\checkpoints\pinn_final.pt",
+        figure_dir = rf"C:\SOURAV\pinns_poisson_solver\outputs\figures",
+        experiment_name = "default"
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Using Device:", device)
 
-    os.makedirs(chechpoint_dir, exist_ok=True)
+    os.makedirs(checkpoint_path, exist_ok=True)
     os.makedirs(figure_dir, exist_ok=True)
     
 
     model = PINN(input_dim=2, hidden_dim=hidden_dim, num_hidden_layers=num_hidden_layers, output_dim=1).to(device)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=lerning_rate)
-
     total_loss_history = []
     pde_loss_history = []
     bc_loss_history = []
 
-    progress_bar = tqdm(range(epochs), desc="Training PINN")
+    start_time = time.time()
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=lerning_rate)
+
+    progress_bar = tqdm(range(adam_epochs), desc=f"Adam [{experiment_name}]")
 
     for epoch in progress_bar:
         model.train()
@@ -45,12 +57,9 @@ def train_pinn(
 
         #print("Interior points shape:", interior_points.shape)
         #print("Boundary points shape:", boundary_points.shape)
-
-        residual = compute_pde_residual(model, interior_points)
-        loss_pde = pde_loss(model, interior_points)
-        loss_bc = boundary_loss(model, boundary_points)
-        loss_total = loss_pde + lambda_bc*loss_bc
-
+        residual_loss = compute_pde_residual(model, interior_points)
+        loss_pde, loss_bc, loss_total = total_loss_fn(model, interior_points, boundary_points, lambda_bc)
+        
         loss_total.backward()
         optimizer.step()
 
@@ -64,16 +73,62 @@ def train_pinn(
             "bc":f"{loss_bc.item():.3e}"
         })
 
-        if (epoch+1) % 1000 == 0:
-            checkpoint_path = os.path.join(chechpoint_dir, f"pinn_epoch_{epoch+1}.pt")
-            torch.save(model.state_dict(), checkpoint_path)
+    if use_lbfgs:
+            model.train()
 
-    final_model_path = os.path.join(chechpoint_dir, "pinn_final.pt")
+            interior_points = sample_boundary_points(n_interior, device)
+            boundary_points = sample_boundary_points(n_boundary_per_side, device)
+
+            optimizer_lbfgs = torch.optim.LBFGS(
+                model.parameters(),
+                lr=1.0,
+                max_iter=lbfgs_steps,
+                max_eval=lbfgs_steps,
+                history_size=50,
+                line_search_fn="strong_wolfe"
+            )
+            lbfgs_iteration = [0]
+
+            def closure():
+                optimizer_lbfgs.zero_grad()
+
+                residual_loss =compute_pde_residual(model, interior_points)
+                loss_pde, loss_bc, loss_total = total_loss_fn(model, interior_points, boundary_points, lambda_bc)
+
+                loss_total.backward()
+
+                total_loss_history.append(loss_total.item())
+                pde_loss_history.append(loss_pde.item())
+                bc_loss_history.append(loss_bc.item())
+
+                if lbfgs_iteration[0] % 20 == 0:
+                    print(
+                    f"LBFGS iter {lbfgs_iteration[0]:4d} | "
+                    f"total={loss_total.item():.3e}, "
+                    f"pde={loss_pde.item():.3e}, "
+                    f"bc={loss_bc.item():.3e}"
+                )
+
+                lbfgs_iteration[0] += 1
+                return loss_total
+            
+            optimizer_lbfgs.step(closure)
+
+    
+    training_time = time.time() - start_time
+
+        
     torch.save({
         "model_state_dict": model.state_dict(),
-        "hidden_dim":hidden_dim,
-        "num_hidden_layers": num_hidden_layers
-    }, final_model_path)
+        "hidden_dim": hidden_dim,
+        "num_hidden_layers": num_hidden_layers,
+        "lambda_bc": lambda_bc,
+        "n_interior": n_interior,
+        "n_boundary_per_side": n_boundary_per_side,
+        "adam_epochs": adam_epochs,
+        "use_lbfgs": use_lbfgs,
+        "lbfgs_steps": lbfgs_steps
+    }, checkpoint_path)
 
     plt.figure(figsize=(8,5))
     plt.semilogy(total_loss_history, label="Total Loss")
@@ -90,7 +145,13 @@ def train_pinn(
     plt.savefig(figure_path, dpi=300)
     plt.show()
 
-    return model, total_loss_history, pde_loss_history, bc_loss_history
+    return {
+        "model": model,
+        "training_time": training_time,
+        "total_loss_history": total_loss_history,
+        "pde_loss_history": pde_loss_history,
+        "bc_loss_history": bc_loss_history
+    }
 
 
 if __name__ == "__main__":
