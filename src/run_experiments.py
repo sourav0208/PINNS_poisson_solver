@@ -81,6 +81,7 @@ def main():
     results = []
 
     for exp in experiments:
+        #checkpoint_path = os.path.dirname()
         checkpoint_path = rf"outputs\checkpoints\{exp['experiment_name']}.pt"
 
         print("\n" + "="*60)
@@ -92,7 +93,7 @@ def main():
             n_boundary_per_side=500,
             hidden_dim=exp["hidden_dim"],
             num_hidden_layers=exp["num_hidden_layers"],
-            lerning_rate=1e-3,
+            learning_rate=1e-3,
             adam_epochs=exp["adam_epochs"],
             lambda_bc=exp["lambda_bc"],
             use_lbfgs=exp["use_lbfgs"],
@@ -105,13 +106,17 @@ def main():
         metrics = evaluate_checkpoint_against_fem(checkpoint_path, fem_path, nx=100, ny=100)
         metrics["experiment_name"] = exp["experiment_name"]
         metrics["training_time_sec"] = train_output["training_time"]
+        metrics["final_total_loss"] = train_output["final_total_loss"]
+        metrics["final_pde_loss"] = train_output["final_pde_loss"]
+        metrics["final_bc_loss"] = train_output["final_bc_loss"]
+
 
         results.append(metrics)
 
         print("Result summary:")
         print(metrics)
 
-    csv_path = rf"outputs\reports\experiment_resuöts.csv"
+    csv_path = rf"outputs\reports\experiment_results.csv"
     fieldnames = [
         "experiment_name",
         "hidden_dim",
@@ -123,7 +128,10 @@ def main():
         "l2_error",
         "rel_l2_error",
         "max_error",
-        "training_time_sec"
+        "training_time_sec",
+        "final_total_loss",
+        "final_pde_loss",
+        "final_bc_loss"
     ]
 
     with open(csv_path, "w", newline="") as f:

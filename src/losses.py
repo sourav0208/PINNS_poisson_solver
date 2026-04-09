@@ -4,6 +4,22 @@ import torch.nn as nn
 mse_loss = nn.MSELoss()
 
 def compute_pde_residual(model, interior_points):
+    if not torch.is_grad_enabled():
+        raise RuntimeError(
+            "Gradient tracking is disabled inside compute_pde_residual(). "
+            "Do not call this inside torch.no_grad() or inference_mode()."
+        )
+
+    if not interior_points.requires_grad:
+        interior_points = interior_points.clone().detach().requires_grad_(True)
+
+    u = model(interior_points)
+
+    if not u.requires_grad:
+        raise RuntimeError(
+            "Model output does not require grad. "
+            "The forward pass likely happened with gradients disabled."
+        )
 
     u = model(interior_points)
 
