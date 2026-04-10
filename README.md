@@ -48,3 +48,52 @@ PINNs are useful in:
 - **scientific machine learning**
 
 ---
+
+# Problem Description
+
+We solve the **2D Poisson equation**:
+
+```text
+-∇²u = 1        in Ω
+u = 0            on ∂Ω
+```
+
+where:
+
+- **u(x, y)** : scalar field
+- **Ω** : computational domain
+- **∂Ω** : boundary
+
+In this project:
+
+**Domain:**
+
+```text
+Ω = [0, 1] × [0, 1]
+```
+
+**Source:**
+
+```text
+f = 1
+```
+
+---
+
+# Why PINNs for Physics Problems?
+
+PINNs are attractive because they allow us to solve PDEs using a **mesh-free learning-based formulation**.
+
+Compared with classical numerical methods, they offer several advantages in certain scenarios:
+
+- no explicit mesh generation during training
+- direct use of **automatic differentiation**
+- flexible handling of unknown fields
+- natural extension to inverse and data-assimilation problems
+- integration with modern AI workflows
+
+At the same time, they must be carefully validated against classical methods such as FEM.
+
+That is why this project includes a full **PINN vs FEM comparison**.
+
+---
