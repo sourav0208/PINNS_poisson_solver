@@ -97,3 +97,67 @@ At the same time, they must be carefully validated against classical methods suc
 That is why this project includes a full **PINN vs FEM comparison**.
 
 ---
+
+# Method Overview
+
+The neural network approximates the scalar field:
+
+```text
+u(x, y)
+```
+
+The total loss is defined as:
+
+```text
+Total Loss = PDE Residual Loss + λ × Boundary Loss
+```
+
+where:
+
+- **PDE Residual Loss** enforces the Poisson equation
+- **Boundary Loss** enforces the Dirichlet condition
+- **λ** controls the weight of the boundary term
+
+The model uses **automatic differentiation** to compute:
+
+- first derivatives
+- second derivatives
+- Laplacian-based PDE residuals
+
+---
+
+# Model Architecture
+
+The PINN takes spatial coordinates as input:
+
+```text
+(x, y) → u(x, y)
+```
+
+A typical configuration used in this project:
+
+- **input dimension** = 2
+- **hidden layers** = 4
+- **hidden dimension** = 32 or 64
+- **activation function** = **Tanh**
+- **output dimension** = 1
+
+The architecture was intentionally kept simple and interpretable so that the impact of width and optimization strategy could be studied clearly.
+
+---
+
+# Training Strategy
+
+Training was performed in two stages:
+
+## Stage 1: Adam
+
+The **Adam optimizer** was used first to obtain a stable initial solution and reduce the loss quickly.
+
+## Stage 2: LBFGS
+
+The **LBFGS optimizer** was then used for refinement.
+
+This two-stage strategy improved convergence and reduced the final PDE residual.
+
+---
