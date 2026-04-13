@@ -161,3 +161,53 @@ The **LBFGS optimizer** was then used for refinement.
 This two-stage strategy improved convergence and reduced the final PDE residual.
 
 ---
+
+---
+
+# PINN Solution Visualization
+
+## Predicted Solution (Contour)
+
+![PINN Solution](outputs/figures/pinn_solution_comparison.png)
+
+---
+
+## Predicted Solution Surface
+
+![PINN Surface](outputs/figures/pinn_solution_surface.png)
+
+---
+
+# FEM Reference Solution
+
+The reference solution was generated using an independently implemented **Finite Element Method (FEM)** solver with **triangular elements**.
+
+This FEM solution is used as a trusted numerical baseline for validation.
+
+## FEM Solution
+
+![FEM Solution](outputs/figures/fem_solution_contour.png)
+
+---
+
+# PINN vs FEM Error Field
+
+The error field below shows the difference between the PINN prediction and the FEM reference solution.
+
+![Error Field](outputs/figures/pinn_fem_error.png)
+
+---
+
+# Key Results
+
+After tuning the architecture and training strategy, the PINN achieved strong agreement with the FEM solution.
+
+A representative result obtained in this project:
+
+- **L2 error** = `8.621377e-04`
+- **Relative L2 error** = `2.110733e-02`
+- **Max error** = `6.272102e-03`
+
+This shows that the trained PINN is **qualitatively correct** and also **quantitatively accurate**.
+
+---
