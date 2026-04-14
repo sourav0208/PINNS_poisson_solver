@@ -211,3 +211,55 @@ A representative result obtained in this project:
 This shows that the trained PINN is **qualitatively correct** and also **quantitatively accurate**.
 
 ---
+
+# Architecture Comparison
+
+A controlled experiment was performed to compare two model widths:
+
+- **hidden_dim = 32**
+- **hidden_dim = 64**
+
+All other settings were kept fixed:
+
+- same PDE
+- same domain
+- same boundary conditions
+- same collocation strategy
+- same optimization schedule
+- same FEM reference
+
+This makes the comparison fair and reproducible.
+
+---
+
+## Relative L2 Error Comparison
+
+![Relative L2 Error Comparison](outputs/figures/comparison_rel_l2_error.png)
+
+---
+
+## Training Time Comparison
+
+![Training Time Comparison](outputs/figures/comparison_training_time.png)
+
+---
+
+## Final Loss Comparison
+
+![Final Loss Comparison](outputs/figures/comparison_final_loss.png)
+
+---
+
+# Controlled Experiment Summary
+
+The experiment showed that increasing the hidden dimension from **32** to **64** significantly improved solution accuracy.
+
+Main observation:
+
+- **hidden_dim = 64** achieved lower final loss
+- **hidden_dim = 64** achieved lower FEM error
+- training time remained comparable
+
+This demonstrates the expected tradeoff between **model capacity** and **numerical accuracy** in PINN-based solvers.
+
+---
