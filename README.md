@@ -263,3 +263,53 @@ Main observation:
 This demonstrates the expected tradeoff between **model capacity** and **numerical accuracy** in PINN-based solvers.
 
 ---
+
+# Technologies Used
+
+This project uses:
+
+- **Python**
+- **PyTorch**
+- **NumPy**
+- **Matplotlib**
+- **SciPy**
+- **CUDA GPU acceleration**
+- **automatic differentiation**
+
+---
+
+# Hardware Used
+
+Training and experiments were performed on:
+
+- **NVIDIA GeForce RTX 5060 Laptop GPU**
+- **32 GB RAM**
+- **Intel Core 7 CPU**
+
+---
+
+# Project Structure
+
+```text
+pinns_poisson_solver/
+│
+├── src/
+│   ├── model.py
+│   ├── data.py
+│   ├── losses.py
+│   ├── train.py
+│   ├── visualize.py
+│   ├── compare_fem_pinn.py
+│   ├── run_experiments.py
+│   └── plot_experiment_results.py
+│
+├── outputs/
+│   ├── checkpoints/
+│   ├── figures/
+│   └── reports/
+│
+├── README.md
+└── requirements.txt
+```
+
+---
