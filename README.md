@@ -313,3 +313,103 @@ pinns_poisson_solver/
 ```
 
 ---
+
+# Technologies Used
+
+PyTorch
+Python  
+NumPy  
+SciPy  
+Matplotlib  
+Pandas  
+Git
+
+---
+
+# How to Run
+
+## 1. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 2. Train the PINN
+
+```bash
+python src/train.py
+```
+
+---
+
+## 3. Run controlled experiments
+
+```bash
+python src/run_experiments.py
+```
+
+---
+
+## 4. Generate comparison plots
+
+```bash
+python src/plot_experiment_results.py
+```
+
+---
+
+# Engineering Highlights
+
+This project demonstrates:
+
+- **Physics-Informed Neural Networks**
+- **automatic differentiation for PDEs**
+- **GPU-accelerated scientific computing**
+- **quantitative validation against FEM**
+- **architecture comparison experiments**
+- **two-stage optimization with Adam and LBFGS**
+- **reproducible AI workflow for engineering simulation**
+
+---
+
+# Future Extensions
+
+Possible next steps for this project include:
+
+- adaptive collocation sampling
+- residual-based refinement
+- harder PDEs and multi-physics problems
+- time-dependent PINNs
+- 3D domain extension
+- hybrid FEM-PINN workflows
+- natural-language simulation interfaces using **GenAI**
+
+---
+
+# Applications
+
+This workflow can be extended to:
+
+- **heat conduction**
+- **diffusion problems**
+- **structural mechanics**
+- **computational physics**
+- **scientific computing**
+- **AI-assisted engineering simulation**
+
+---
+
+# Author
+
+    Sourav
+    MSc Computational Mechanics  
+    Technical University of Munich
+
+
+---
+
+# License
+
+This project is released under the **MIT License**.
